@@ -1,103 +1,57 @@
 <?php
 
+    require_once __DIR__ . '/partials/constants.php';
+    require_once __DIR__ . '/partials/variables.php';
+    require_once __DIR__ . '/partials/getPlayersName.php';
+    require_once __DIR__ . '/partials/buildBoard.php';
+    require_once __DIR__ . '/partials/showBoard.php';
+    require_once __DIR__ . '/partials/isPositionCorrect.php';
+    require_once __DIR__ . '/partials/validate.php';
+    require_once __DIR__ . '/partials/isBoardFull.php';
+    require_once __DIR__ . '/partials/swapPlayer.php';
+    require_once __DIR__ . '/partials/showWinner.php';
+    require_once __DIR__ . '/partials/playAgain.php';
+
     do {
-        $playerOne = readline('Player 1 (X) - Digite o seu nome: ');
-        $playerTwo = readline('Player 2 (O) - Digite o seu nome: ');
+        $players = getPlayersName();
 
-        $player = 'X';
+        $player = PLAYER_ONE_ICON;
 
-        $board = [
-            '.', '.', '.', 
-            '.', '.', '.', 
-            '.', '.', '.'
-        ];
+        $board = buildBoard();
 
         $winner = null;
 
         while($winner === null) {
-            echo <<<EOL
-
-                Posições:  | Tabuleiro
-                           |
-                    0|1|2  |  $board[0]|$board[1]|$board[2]
-                    3|4|5  |  $board[3]|$board[4]|$board[5]
-                    6|7|8  |  $board[6]|$board[7]|$board[8]
-
-                EOL
-            ;
+            echo showBoard($board);
 
             $position = (int) readline("Player {$player}, digite a sua posicão: ");
 
-            if(!in_array($position, [0, 1, 2, 3, 4, 5, 6, 7, 8])) {
-                echo "\nPosição inexistente, digite novamente.\n";
-                continue;
-            }
-
-            if($board[$position] !== '.'){
-                echo "\nPosição ocupada, digite novamente.\n";
+            if(!isPositionCorrect($position, $board)) {
                 continue;
             }
 
             $board[$position] = $player;
 
-            if(
-                ($board[0] === 'X' && $board[1] === 'X' && $board[2] === 'X') ||
-                ($board[3] === 'X' && $board[4] === 'X' && $board[5] === 'X') ||
-                ($board[6] === 'X' && $board[7] === 'X' && $board[8] === 'X') ||
-                ($board[0] === 'X' && $board[3] === 'X' && $board[6] === 'X') ||
-                ($board[1] === 'X' && $board[4] === 'X' && $board[7] === 'X') ||
-                ($board[2] === 'X' && $board[5] === 'X' && $board[8] === 'X') ||
-                ($board[0] === 'X' && $board[4] === 'X' && $board[8] === 'X') ||
-                ($board[2] === 'X' && $board[4] === 'X' && $board[6] === 'X')
-            ) {
-                $winner = 'X';
-            } else if(
-                ($board[0] === 'O' && $board[1] === 'O' && $board[2] === 'O') ||
-                ($board[3] === 'O' && $board[4] === 'O' && $board[5] === 'O') ||
-                ($board[6] === 'O' && $board[7] === 'O' && $board[8] === 'O') ||
-                ($board[0] === 'O' && $board[3] === 'O' && $board[6] === 'O') ||
-                ($board[1] === 'O' && $board[4] === 'O' && $board[7] === 'O') ||
-                ($board[2] === 'O' && $board[5] === 'O' && $board[8] === 'O') ||
-                ($board[0] === 'O' && $board[4] === 'O' && $board[8] === 'O') ||
-                ($board[2] === 'O' && $board[4] === 'O' && $board[6] === 'O')
-            ) {
-                $winner = 'O';
+            if(validate($board, PLAYER_ONE_ICON)) {
+                $winner = PLAYER_ONE_ICON;
+            } else if(validate($board, PLAYER_TWO_ICON)) {
+                $winner = PLAYER_TWO_ICON;
+            } else{
+                $winner = null;
             }
 
-            if(!in_array('.', $board)) {
+            if(isBoardFull($board)) {
                 break;
             }
 
-            if($player === 'X'){
-                $player = 'O';
-            } else {
-                $player = 'X';
-            }
+            $player = swapPlayer($player);
         }
 
-        echo <<<EOL
+        echo showBoard($board);
 
-            Posições:  | Tabuleiro
-                       |
-                0|1|2  | $board[0]$board[1]$board[2]
-                3|4|5  | $board[3]$board[4]$board[5]
-                6|7|8  | $board[6]$board[7]$board[8]
+        echo showWinner($winner, $players);
 
-            EOL
-        ;
-
-        if($winner === 'X') {
-            echo "VENCEDOR: {$playerOne}";
-        } else if($winner === 'O') {
-            echo "VENCEDOR: {$playerTwo}";
-        } else {
-            echo "EMPATE\n";
-        }
-
-        $playAgain = filter_var(
-            readline("\nDeseja jogar novamente? (true/false): "),
-            FILTER_VALIDATE_BOOLEAN
-        );
+        $playAgain = playAgain();
 
         echo"\n";
 
